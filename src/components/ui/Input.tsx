@@ -1,31 +1,39 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import React from 'react'
+import { TextInput, View, Text, StyleSheet, TextInputProps } from 'react-native'
+import { colors, radius } from '../../lib/theme'
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
-  error?: string;
+interface InputProps extends TextInputProps {
+  label?: string
+  error?: string
 }
 
-const Input: React.FC<InputProps> = ({ label, error, className, id, ...props }) => {
+export function Input({ label, error, style, ...props }: InputProps) {
   return (
-    <div className="w-full">
-      {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
-          {label}
-        </label>
-      )}
-      <input
-        id={id}
-        className={cn(
-          "w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 sm:text-sm transition-shadow",
-          error && "border-red-500 focus:border-red-500 focus:ring-red-500",
-          className
-        )}
+    <View style={styles.wrapper}>
+      {label && <Text style={styles.label}>{label}</Text>}
+      <TextInput
+        style={[styles.input, error && styles.inputError, style]}
+        placeholderTextColor={colors.gray400}
         {...props}
       />
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-    </div>
-  );
-};
+      {error && <Text style={styles.error}>{error}</Text>}
+    </View>
+  )
+}
 
-export default Input;
+const styles = StyleSheet.create({
+  wrapper: { marginBottom: 12 },
+  label: { fontSize: 13, fontWeight: '600', color: colors.gray700, marginBottom: 6 },
+  input: {
+    height: 52,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.gray200,
+    backgroundColor: colors.white,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    color: colors.black,
+  },
+  inputError: { borderColor: colors.primary },
+  error: { fontSize: 12, color: colors.primary, marginTop: 4 },
+})

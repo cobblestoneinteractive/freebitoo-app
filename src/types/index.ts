@@ -1,76 +1,86 @@
+export type OrderStatus =
+  | 'pending'
+  | 'accepted'
+  | 'preparing'
+  | 'ready'
+  | 'on_the_way'
+  | 'delivered'
+  | 'cancelled'
 
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  tags?: string[];
-  imageUrl?: string;
-  categoryId: string;
+export interface Shop {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  phone: string | null
+  address_line: string | null
+  city: string | null
+  is_active: boolean
+  logo_url: string | null
+  lat: number | null
+  lng: number | null
+  distance_km?: number
+  cuisine_type?: string
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  slug: string;
+export interface ProductCategory {
+  id: string
+  shop_id: string
+  name: string
+  sort_order: number
 }
 
-export interface Restaurant {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  cuisineType: string;
-  rating: number;
-  deliveryTimeRange: string; // e.g., "20-30 min"
-  deliveryFee: number;
-  imageUrl: string;
-  address: string;
-  categories: Category[];
-  menu: MenuItem[];
+export interface Product {
+  id: string
+  shop_id: string
+  category_id: string
+  name: string
+  description: string | null
+  price_cents: number
+  is_available: boolean
+  image_url: string | null
+  sort_order: number
 }
 
 export interface CartItem {
-  menuItem: MenuItem;
-  quantity: number;
-  restaurantId: string;
+  product: Product
+  quantity: number
 }
-
-export interface Address {
-  street: string;
-  city: string;
-  zipCode: string;
-  instructions?: string;
-}
-
-export interface UserContact {
-  name: string;
-  phone: string;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  phone?: string;
-}
-
-export type PaymentTiming = 'online' | 'in_person';
-export type PaymentMethod = 'card' | 'cash'; // 'card' can be online or POS
-export type DeliveryMethod = 'delivery' | 'pickup';
 
 export interface Order {
-  restaurantId: string;
-  items: CartItem[];
-  subtotal: number;
-  deliveryFee: number;
-  total: number;
-  address: Address;
-  contact: UserContact;
-  paymentTiming: PaymentTiming;
-  paymentMethod: PaymentMethod;
-  deliveryMethod: DeliveryMethod;
-  status: 'pending' | 'confirmed' | 'delivered';
-  createdAt: string;
-  userId?: string;
+  id: string
+  shop_id: string
+  customer_id: string
+  status: OrderStatus
+  total_cents: number
+  delivery_address_line: string | null
+  delivery_city: string | null
+  delivery_notes: string | null
+  customer_name: string | null
+  customer_phone: string | null
+  order_number: string | null
+  order_type: 'delivery' | 'pickup'
+  rider_name: string | null
+  rider_phone: string | null
+  on_the_way_at: string | null
+  delivered_at: string | null
+  created_at: string
+  order_items?: OrderItem[]
+  shops?: { name: string; logo_url: string | null }
+}
+
+export interface OrderItem {
+  id: string
+  product_name_snapshot: string
+  unit_price_cents: number
+  quantity: number
+  line_total_cents: number
+}
+
+export interface Profile {
+  id: string
+  user_id: string
+  full_name: string | null
+  phone: string | null
+  is_customer?: boolean
 }

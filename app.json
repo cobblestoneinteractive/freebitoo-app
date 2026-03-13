@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "FreeBitoo",
+    "slug": "freebitoo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#E8192C" },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cobblestone.freebitoo",
+      "usesAppleSignIn": true
+    },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#E8192C" },
+      "package": "com.cobblestone.freebitoo"
+    },
+    "plugins": [
+      "expo-location",
+      "expo-apple-authentication",
+      ["expo-secure-store"]
+    ]
+  }
+}

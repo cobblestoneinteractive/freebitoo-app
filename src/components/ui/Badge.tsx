@@ -1,23 +1,27 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import React from 'react'
+import { View, Text, StyleSheet, ViewStyle } from 'react-native'
+import { colors, radius } from '../../lib/theme'
 
 interface BadgeProps {
-  children: React.ReactNode;
-  className?: string;
-  variant?: 'orange' | 'gray';
+  label: string
+  color?: string
+  bg?: string
+  style?: ViewStyle
 }
 
-const Badge: React.FC<BadgeProps> = ({ children, className, variant = 'gray' }) => {
-  const variants = {
-    orange: "bg-primary-50 text-primary-800",
-    gray: "bg-gray-100 text-gray-800",
-  };
-
+export function Badge({ label, color = colors.white, bg = colors.primary, style }: BadgeProps) {
   return (
-    <span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium", variants[variant], className)}>
-      {children}
-    </span>
-  );
-};
+    <View style={[styles.badge, { backgroundColor: bg }, style]}>
+      <Text style={[styles.text, { color }]}>{label}</Text>
+    </View>
+  )
+}
 
-export default Badge;
+const styles = StyleSheet.create({
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radius.full,
+  },
+  text: { fontSize: 11, fontWeight: '600' },
+})

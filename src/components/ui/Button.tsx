@@ -1,53 +1,48 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
-import { motion, HTMLMotionProps } from 'framer-motion';
+import React from 'react'
+import { TouchableOpacity, Text, ActivityIndicator, StyleSheet, ViewStyle } from 'react-native'
+import { colors, radius } from '../../lib/theme'
 
-interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
-  children?: React.ReactNode;
+type Variant = 'primary' | 'outline' | 'ghost'
+
+interface ButtonProps {
+  onPress: () => void
+  label: string
+  variant?: Variant
+  loading?: boolean
+  disabled?: boolean
+  style?: ViewStyle
 }
 
-const Button: React.FC<ButtonProps> = ({
-  className,
-  variant = 'primary',
-  size = 'md',
-  isLoading,
-  children,
-  ...props
-}) => {
-  const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
-  
-  const variants = {
-    primary: "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500",
-    secondary: "bg-primary-50 text-primary-900 hover:bg-primary-100 focus:ring-primary-500",
-    outline: "border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700 focus:ring-gray-500",
-    ghost: "bg-transparent hover:bg-gray-100 text-gray-700",
-  };
-
-  const sizes = {
-    sm: "h-8 px-3 text-sm",
-    md: "h-10 px-4 py-2",
-    lg: "h-12 px-6 text-lg",
-  };
-
+export function Button({ onPress, label, variant = 'primary', loading, disabled, style }: ButtonProps) {
+  const isDisabled = disabled || loading
   return (
-    <motion.button
-      whileTap={{ scale: 0.97 }}
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
-      disabled={isLoading || props.disabled}
-      {...props}
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={isDisabled}
+      activeOpacity={0.8}
+      style={[styles.base, styles[variant], isDisabled && styles.disabled, style]}
     >
-      {isLoading ? (
-        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      ) : null}
-      {children}
-    </motion.button>
-  );
-};
+      {loading ? (
+        <ActivityIndicator color={variant === 'primary' ? colors.white : colors.primary} size="small" />
+      ) : (
+        <Text style={[styles.label, variant !== 'primary' && styles.labelAlt]}>{label}</Text>
+      )}
+    </TouchableOpacity>
+  )
+}
 
-export default Button;
+const styles = StyleSheet.create({
+  base: {
+    height: 52,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  primary: { backgroundColor: colors.primary },
+  outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.primary },
+  ghost: { backgroundColor: 'transparent' },
+  disabled: { opacity: 0.5 },
+  label: { color: colors.white, fontSize: 16, fontWeight: '600' },
+  labelAlt: { color: colors.primary },
+})

@@ -1,55 +1,126 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
-import { MenuItem } from '../../types';
-import { formatCurrency } from '../../lib/utils';
-import { motion } from 'framer-motion';
-import { useStore } from '../../context/StoreContext';
-import Button from '../ui/Button';
+import React from 'react'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { MotiView } from 'moti'
+import { Ionicons } from '@expo/vector-icons'
+import { useCart } from '../../context/CartContext'
+import { colors, spacing, radius } from '../../lib/theme'
+import { Product } from '../../types'
+import { formatPrice } from '../../lib/utils'
 
-interface MenuItemCardProps {
-  item: MenuItem;
-  restaurantId: string;
+interface Props {
+  product: Product
+  shopId: string
 }
 
-const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, restaurantId }) => {
-  const { addToCart, cart } = useStore();
-  const quantityInCart = cart.find(i => i.menuItem.id === item.id)?.quantity || 0;
+export function MenuItemCard({ product, shopId }: Props) {
+  const { items, addItem, updateQty } = useCart()
+  const cartItem = items.find(i => i.product.id === product.id)
+  const qty = cartItem?.quantity ?? 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex gap-4 p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-    >
-      <div className="flex-grow">
-        <div className="flex items-center gap-2 mb-1">
-          <h4 className="font-semibold text-gray-900">{item.name}</h4>
-          {item.tags?.map(tag => (
-             <span key={tag} className="text-[10px] font-bold uppercase tracking-wider text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded">
-               {tag}
-             </span>
-          ))}
-        </div>
-        <p className="text-gray-500 text-sm line-clamp-2 mb-2">{item.description}</p>
-        <div className="flex items-center justify-between mt-2">
-            <span className="font-medium text-gray-900">{formatCurrency(item.price)}</span>
-            <Button
-              size="sm"
-              variant={quantityInCart > 0 ? 'secondary' : 'outline'}
-              className="rounded-full w-8 h-8 p-0"
-              onClick={() => addToCart(item, restaurantId)}
-            >
-              <Plus size={16} />
-            </Button>
-        </div>
-      </div>
-      {item.imageUrl && (
-        <div className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
-          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-        </div>
-      )}
-    </motion.div>
-  );
-};
+    <View style={styles.card}>
+      {/* Text content */}
+      <View style={styles.textContent}>
+        <Text style={styles.name}>{product.name}</Text>
+        {product.description && (
+          <Text style={styles.description} numberOfLines={2}>
+            {product.description}
+          </Text>
+        )}
+        <Text style={styles.price}>{formatPrice(product.price_cents)}</Text>
+      </View>
 
-export default MenuItemCard;
+      {/* Image placeholder / counter */}
+      <View style={styles.right}>
+        <View style={styles.imagePlaceholder}>
+          <Text style={styles.imagePlaceholderText}>🍽️</Text>
+        </View>
+
+        <MotiView
+          key={qty}
+          from={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', damping: 12 }}
+          style={styles.counterContainer}
+        >
+          {qty === 0 ? (
+            <TouchableOpacity
+              style={styles.addBtn}
+              onPress={() => addItem(product, shopId)}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="add" size={22} color={colors.white} />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.counter}>
+              <TouchableOpacity
+                style={styles.counterBtn}
+                onPress={() => updateQty(product.id, -1)}
+              >
+                <Ionicons name="remove" size={18} color={colors.primary} />
+              </TouchableOpacity>
+              <Text style={styles.counterQty}>{qty}</Text>
+              <TouchableOpacity
+                style={styles.counterBtn}
+                onPress={() => addItem(product, shopId)}
+              >
+                <Ionicons name="add" size={18} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
+          )}
+        </MotiView>
+      </View>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gray100,
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  textContent: { flex: 1 },
+  name: { fontSize: 15, fontWeight: '600', color: colors.black, marginBottom: 4 },
+  description: { fontSize: 13, color: colors.gray500, lineHeight: 18, marginBottom: 6 },
+  price: { fontSize: 15, fontWeight: '700', color: colors.black },
+  right: { alignItems: 'center', gap: spacing.sm },
+  imagePlaceholder: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.md,
+    backgroundColor: colors.gray100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagePlaceholderText: { fontSize: 28 },
+  counterContainer: { alignItems: 'center' },
+  addBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  counter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.primaryLight,
+    borderRadius: radius.full,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  counterBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  counterQty: { fontSize: 15, fontWeight: '700', color: colors.primary, minWidth: 20, textAlign: 'center' },
+})
