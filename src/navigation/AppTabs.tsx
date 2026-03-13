@@ -2,7 +2,7 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
 import { HomeStack } from './HomeStack'
-import { OrdersScreen } from '../screens/orders/OrdersScreen'
+import { OrdersStack } from './OrdersStack'
 import { ProfileScreen } from '../screens/profile/ProfileScreen'
 import { colors } from '../lib/theme'
 
@@ -36,7 +36,7 @@ export function AppTabs() {
       <Tab.Screen name="HomeTab" component={HomeStack} options={{ title: 'Home' }} />
       <Tab.Screen
         name="OrdersTab"
-        component={OrdersScreen}
+        component={OrdersStack}
         options={{ title: 'Ordini' }}
       />
       <Tab.Screen name="ProfileTab" component={ProfileScreen} options={{ title: 'Profilo' }} />
