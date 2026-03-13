@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { Ionicons } from '@expo/vector-icons'
 import { useCart } from '../../context/CartContext'
 import { colors, spacing, radius } from '../../lib/theme'

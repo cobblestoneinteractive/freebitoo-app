@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, spacing, radius, typography } from '../../lib/theme'

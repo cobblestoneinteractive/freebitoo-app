@@ -8,7 +8,7 @@ import {
   Linking,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../../lib/supabase'
 import { colors, spacing, radius, typography } from '../../lib/theme'

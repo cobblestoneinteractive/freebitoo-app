@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useCart } from '../../context/CartContext'
 import { colors, spacing, radius } from '../../lib/theme'

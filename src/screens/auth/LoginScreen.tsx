@@ -9,7 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
 } from 'react-native'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import * as WebBrowser from 'expo-web-browser'
 import { makeRedirectUri } from 'expo-auth-session'
 import * as AppleAuthentication from 'expo-apple-authentication'

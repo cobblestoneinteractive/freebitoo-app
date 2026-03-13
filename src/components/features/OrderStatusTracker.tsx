@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, spacing, radius } from '../../lib/theme'
 import { OrderStatus } from '../../types'

@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, ViewStyle } from 'react-native'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { colors } from '../../lib/theme'
 
 export function Skeleton({ style }: { style?: ViewStyle }) {

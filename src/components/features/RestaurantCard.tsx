@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { MotiView } from 'moti'
+import { MotiView } from '../../lib/moti-compat'
 import { colors, radius, spacing } from '../../lib/theme'
 import { Shop } from '../../types'
 import { formatDistance } from '../../lib/utils'
