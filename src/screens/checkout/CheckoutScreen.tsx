@@ -41,39 +41,32 @@ export function CheckoutScreen({ navigation }: any) {
     if (!shopId || !user) return
     setLoading(true)
     try {
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
+      // Edge Function: crea ordine + items atomicamente
+      const { data, error } = await supabase.functions.invoke('create-order', {
+        body: {
           shop_id: shopId,
-          customer_id: user.id,
-          status: 'pending',
+          items: items.map(i => ({
+            product_id: i.product.id,
+            product_name_snapshot: i.product.name,
+            unit_price_cents: i.product.price_cents,
+            quantity: i.quantity,
+            line_total_cents: i.product.price_cents * i.quantity,
+          })),
           total_cents: total + DELIVERY_FEE,
           delivery_address_line: address,
           delivery_city: city,
-          delivery_notes: notes || null,
-          customer_name: profile?.full_name,
-          customer_phone: profile?.phone,
-          order_type: 'delivery',
-        })
-        .select()
-        .single()
+          delivery_notes: notes || undefined,
+          customer_name: profile?.full_name ?? '',
+          customer_phone: profile?.phone ?? '',
+          payment_method: paymentMethod,
+        },
+      })
 
-      if (orderError) throw orderError
-
-      const { error: itemsError } = await supabase.from('order_items').insert(
-        items.map(i => ({
-          order_id: order.id,
-          product_id: i.product.id,
-          product_name_snapshot: i.product.name,
-          unit_price_cents: i.product.price_cents,
-          quantity: i.quantity,
-          line_total_cents: i.product.price_cents * i.quantity,
-        }))
-      )
-      if (itemsError) throw itemsError
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
 
       clearCart()
-      navigation.replace('OrderSuccess', { order })
+      navigation.replace('OrderSuccess', { order: data.order })
     } catch (err: any) {
       Alert.alert('Errore', err.message)
     } finally {

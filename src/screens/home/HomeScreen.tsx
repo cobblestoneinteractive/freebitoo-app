@@ -35,18 +35,29 @@ export function HomeScreen({ navigation }: any) {
 
   const fetchShops = async (loc?: Location.LocationObject | null) => {
     let data: Shop[] | null = null
+
     if (loc) {
-      const res = await supabase.rpc('get_nearby_shops', {
-        p_lat: loc.coords.latitude,
-        p_lng: loc.coords.longitude,
-        p_radius_km: 50,
+      // Edge Function: ristoranti vicini ottimizzati lato server
+      const { data: fnData, error } = await supabase.functions.invoke('get-nearby-shops', {
+        body: {
+          lat: loc.coords.latitude,
+          lng: loc.coords.longitude,
+          radius_km: 50,
+        },
       })
-      data = res.data
+      if (!error && fnData?.shops) data = fnData.shops
     }
+
+    // Fallback: tutti i ristoranti attivi (se no location o edge fn fallisce)
     if (!data) {
-      const res = await supabase.from('shops').select('*').eq('is_active', true).limit(20)
-      data = res.data
+      const res = await supabase
+        .from('shops')
+        .select('id, name, slug, description, address_line, city, logo_url, lat, lng, is_active')
+        .eq('is_active', true)
+        .limit(20)
+      data = res.data as Shop[] | null
     }
+
     setShops(data ?? [])
     setFiltered(data ?? [])
     setLoading(false)
