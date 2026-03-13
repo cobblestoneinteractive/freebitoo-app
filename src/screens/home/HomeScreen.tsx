@@ -34,61 +34,74 @@ export function HomeScreen({ navigation }: any) {
   const [activeCategory, setActiveCategory] = useState('Tutti')
 
   const fetchShops = async (loc?: Location.LocationObject | null) => {
-    let data: Shop[] | null = null
+    try {
+      // Edge Function: gestisce sia nearby che fallback lato server
+      const body = loc
+        ? { lat: loc.coords.latitude, lng: loc.coords.longitude, radius_km: 50 }
+        : {}
 
-    if (loc) {
-      // Edge Function: ristoranti vicini ottimizzati lato server
-      const { data: fnData, error } = await supabase.functions.invoke('get-nearby-shops', {
-        body: {
-          lat: loc.coords.latitude,
-          lng: loc.coords.longitude,
-          radius_km: 50,
-        },
-      })
-      if (!error && fnData?.shops) data = fnData.shops
+      const { data: fnData, error: fnError } = await supabase.functions.invoke('get-nearby-shops', { body })
+
+      if (!fnError && fnData?.shops && Array.isArray(fnData.shops)) {
+        setShops(fnData.shops)
+        setFiltered(fnData.shops)
+        return
+      }
+    } catch (_) {
+      // Edge function non disponibile, usa fallback diretto
     }
 
-    // Fallback: tutti i ristoranti attivi (se no location o edge fn fallisce)
-    if (!data) {
-      const res = await supabase
+    // Fallback diretto a Supabase (sempre garantito)
+    try {
+      const { data } = await supabase
         .from('shops')
-        .select('id, name, slug, description, address_line, city, logo_url, lat, lng, is_active')
+        .select('id, name, slug, description, phone, address_line, city, postal_code, logo_url, lat, lng, is_active')
         .eq('is_active', true)
-        .limit(20)
-      data = res.data as Shop[] | null
+        .limit(30)
+      setShops((data as Shop[]) ?? [])
+      setFiltered((data as Shop[]) ?? [])
+    } catch (e) {
+      console.error('fetchShops fallback error:', e)
     }
-
-    setShops(data ?? [])
-    setFiltered(data ?? [])
-    setLoading(false)
-    setRefreshing(false)
   }
 
   const requestLocation = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync()
-    if (status === 'granted') {
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
-      setLocation(loc)
-      const geocode = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      })
-      if (geocode[0]) {
-        setLocationName(geocode[0].city || geocode[0].region || 'La tua posizione')
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync()
+      if (status === 'granted') {
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
+        setLocation(loc)
+        try {
+          const geocode = await Location.reverseGeocodeAsync({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          })
+          if (geocode[0]) {
+            setLocationName(geocode[0].city || geocode[0].region || 'La tua posizione')
+          }
+        } catch (_) { setLocationName('La tua posizione') }
+        return loc
       }
-      return loc
-    }
+    } catch (_) {}
     setLocationName('Posizione non disponibile')
     return null
   }
 
   useEffect(() => {
-    requestLocation().then(loc => fetchShops(loc))
+    const init = async () => {
+      const loc = await requestLocation()
+      await fetchShops(loc)
+      setLoading(false)
+      setRefreshing(false)
+    }
+    init()
   }, [])
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
     await fetchShops(location)
+    setLoading(false)
+    setRefreshing(false)
   }, [location])
 
   useEffect(() => {
